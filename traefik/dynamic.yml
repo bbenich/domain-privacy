@@ -1,0 +1,26 @@
+# Dynamic configuration for Traefik
+http:
+  routers:
+    # Default router for unmatched domains - uses Traefik's auto-generated self-signed cert
+    default:
+      rule: "HostRegexp(`{host:.+}`)"
+      priority: 1
+      service: redirect-service
+      tls: true  # This will use Traefik's auto-generated self-signed certificate
+      middlewares:
+        - redirect-to-external
+
+  services:
+    # Dummy service for redirect
+    redirect-service:
+      loadBalancer:
+        servers:
+          - url: "http://localhost"
+
+  middlewares:
+    # Redirect to external domain
+    redirect-to-external:
+      redirectRegex:
+        regex: "^https?://.*"
+        replacement: "https://example-redirect.com"
+        permanent: true
